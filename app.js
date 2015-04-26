@@ -133,16 +133,23 @@ console.log('The URL is', url);}          // successful response
 console.log("url==>"+url);
     res.status(200);
 	res.setHeader('Content-Type', 'application/json');
-    res.json({
+    //fs.unlinkSync(req.files.thumbnail.path);
+    fs.unlink(req.files.thumbnail.path, function (err) {
+  if (err) throw err;
+  console.log('successfully deleted');
+});
+            res.json({
                 
 				"message": "Upload File Called",
                 "s3":url
             });
+           
+            //fs.rmdirSync(req.files.thumbnail.path);
         });
     }
     });
-    
-   
+     
+    //fs.unlink();
 	});
 
 
