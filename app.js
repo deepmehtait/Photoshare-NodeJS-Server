@@ -1,10 +1,36 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
+// file system handeling 
 var fs = require('fs');
+// Printing out whole Body in JSON
+var util = require('util');
+// multi part handeling
+var multer  = require('multer')
 //var mongooseschema= require('models/userdata');
+var AWS = require('aws-sdk');
+AWS.config.update({
+accessKeyId: 'AKIAJRSSTBSKXU62UWUA',
+    secretAccessKey: '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',
+    region:'us-west-1'
+});
+var s3= new AWS.S3();
 var app = express();
 app.use(bodyParser.json());
+// Set Destination folder
+// configure multer
+app.use(multer({ dest: './uploads5/',
+ rename: function (fieldname, filename) {
+    return filename+Date.now();
+  },
+onFileUploadStart: function (file) {
+  console.log(file.originalname + ' is starting ...')
+},
+onFileUploadComplete: function (file) {
+  console.log(file.fieldname + ' uploaded to  ' + file.path)
+  done=true;
+}
+}));
 
 mongoose.connect('mongodb://127.0.0.1:27017/photoshare', function(err, db) {
     if (err) {
@@ -43,6 +69,82 @@ var userSchema = new Schema({
 });
 
 var User = mongoose.model('users', userSchema);
+
+//Test Rest Api
+
+app.get('/photoshare/api/v1/test', function(req,res){
+	
+	res.status(200);
+	res.setHeader('Content-Type', 'application/json');
+
+	res.json({
+                "id": 1,
+                "name": "deep"
+            });
+	
+	});
+app.post('/photoshare/api/v1/test', function(req,res){
+	
+	var userName = req.body.name;
+    var userID = req.body.userid;
+	var alldata= req.body;
+	
+	console.log(util.inspect(alldata, false, null));
+	console.log("Name:"+userName+" Userid:"+userID);
+	res.status(200);
+	res.setHeader('Content-Type', 'application/json');
+
+	res.json({
+                "id": 1,
+                "name": userName,
+				"userid": userID,
+				"message": "POST Call Success..!!"
+            });
+	
+	});
+var getImage=
+// TEST API FOR Multi part form data upload
+app.post('/photoshare/api/v1/test/upload', function(req,res){
+	var url="";
+	console.log(req.body);
+    console.log("----"+req.files);
+    console.log(util.inspect(req.files, false, null));
+    console.log("des path"+req.files.thumbnail.path);
+    fs.readFile(req.files.thumbnail.path, function(err,data){
+    if(err){
+    console.log(err);
+    }else{
+    //    console.log("image data-"+data);
+    var params={
+    Bucket:"photoshareappcmpe277",
+    Key: req.files.thumbnail.name,
+    ContentType: 'image/jpg',
+        CacheControl: 'max-age=31536000',
+        Body:data
+    };
+        
+        s3.putObject(params, function(err, data) {
+  if (err) {console.log(err, err.stack); }// an error occurred
+  else {    console.log("upload data="+util.inspect(data, false, null)); 
+       resonsedata=data;
+       var params = {Bucket: 'photoshareappcmpe277', Key: req.files.thumbnail.name};
+url = s3.getSignedUrl('getObject', params);
+console.log('The URL is', url);}          // successful response
+console.log("url==>"+url);
+    res.status(200);
+	res.setHeader('Content-Type', 'application/json');
+    res.json({
+                
+				"message": "Upload File Called",
+                "s3":url
+            });
+        });
+    }
+    });
+    
+   
+	});
+
 
 //mongoose.model('userdata', userSchema);
 // post users data i.e Register user 
