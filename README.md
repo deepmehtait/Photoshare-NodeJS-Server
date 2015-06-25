@@ -1,5 +1,5 @@
 # Photoshare-NodeJS-Server
-NodeJS RESTful API server which uses Mongodb as database.
+NodeJS RESTful API server which uses Mongodb as database. Stores Images to Amazon S3.
 ## Installation Instruction
 First of all add all node modules via 
 ```node
