@@ -10,8 +10,8 @@ var multer  = require('multer')
 //var mongooseschema= require('models/userdata');
 var AWS = require('aws-sdk');
 AWS.config.update({
-accessKeyId: 'AKIAJRSSTBSKXU62UWUA',
-    secretAccessKey: '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',
+accessKeyId: 'ASSESS_KEY',
+    secretAccessKey: 'SECRETE_KEY',
     region:'us-west-1'
 });
 var s3= new AWS.S3();
